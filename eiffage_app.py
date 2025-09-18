@@ -182,10 +182,12 @@ st.markdown('<div class="white-content">', unsafe_allow_html=True)
 # Image left-aligned inside the white box
 st.markdown('<div style="display: flex; align-items: center;">', unsafe_allow_html=True)
 try:
-    st.image("eiffage pic for site .png", use_container_width=False)
+    st.image("eiffage pic for site .png", use_container_width=False, output_format="PNG")
+    st.markdown('<style>img[src*="eiffage pic for site .png"] {height: 80px !important; width: auto !important; object-fit: cover; display: block; margin: 0;}</style>', unsafe_allow_html=True)
 except:
     st.warning("Image not found at the specified path. Using placeholder.")
     st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
+    st.markdown('<style>img[src*="via.placeholder.com"] {height: 80px !important; width: auto !important; object-fit: cover; display: block; margin: 0;}</style>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Content sections
