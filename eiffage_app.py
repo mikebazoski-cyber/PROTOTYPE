@@ -45,9 +45,9 @@ st.markdown("""
     
     /* White content area */
     .white-content {
-        background-color: var(--light-white);
-    min-height: 80px; /* half of previous white height */
-    padding-top: 80px; /* Space for fixed black bar */
+        background-color: #FF0000;
+        min-height: 40px; /* half of previous white height */
+        padding-top: 80px; /* Space for fixed black bar */
     }
     
     /* Hero section with image and buttons */
@@ -173,62 +173,45 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Add black top bar
-st.markdown('<div class="black-top-bar"></div>', unsafe_allow_html=True)
 
-# White content area
-st.markdown('<div class="white-content">', unsafe_allow_html=True)
 
-# Image left-aligned inside the white box
-st.markdown('<div style="display: flex; align-items: center;">', unsafe_allow_html=True)
-try:
-    st.image("eiffage pic for site .png", use_container_width=False, output_format="PNG")
-    st.markdown('<style>img[src*="eiffage pic for site .png"] {height: 80px !important; width: auto !important; object-fit: cover; display: block; margin: 0;}</style>', unsafe_allow_html=True)
-except:
-    st.warning("Image not found at the specified path. Using placeholder.")
-    st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
-    st.markdown('<style>img[src*="via.placeholder.com"] {height: 80px !important; width: auto !important; object-fit: cover; display: block; margin: 0;}</style>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
-# Content sections
-st.markdown('<div class="content-section">', unsafe_allow_html=True)
-
-# Navigation callbacks
-def go_to_home():
-    st.session_state.current_page = "home"
-
-def go_to_how_it_works():
-    st.session_state.current_page = "how_it_works"
-
-def go_to_launch():
-    st.session_state.current_page = "launch"
-
-# Brief introduction
-
+# --- MAIN APP ENTRYPOINT (NEW LAYOUT ONLY) ---
 def main():
-    # Set up session state for navigation
+    # Navigation state
     if "current_page" not in st.session_state:
         st.session_state.current_page = "home"
 
-    # Hero section with navigation buttons
-    col1, col2, col3 = st.columns([1,1,1])
-    with col1:
-        st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        if st.button("Home", key="home_btn_custom_top"):
-            go_to_home()
-        st.markdown('</div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        if st.button("How it Works", key="how_it_works_btn_custom_top"):
-            go_to_how_it_works()
-        st.markdown('</div>', unsafe_allow_html=True)
-    with col3:
-        st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        if st.button("Launch", key="launch_btn_custom_top"):
-            go_to_launch()
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Handle navigation via HTML forms
+    nav = st.query_params.get("nav", [None])[0]
+    if nav:
+        st.session_state.current_page = nav
 
-    # Main page logic
+    # --- HERO SECTION (red box, image left, nav buttons right) ---
+    st.markdown('<div class="white-content">', unsafe_allow_html=True)
+    st.markdown('<div class="white-content-row" style="display: flex; align-items: center; justify-content: space-between;">', unsafe_allow_html=True)
+    # Left: Image
+    try:
+        st.image("eiffage pic for site .png", use_container_width=False, output_format="PNG", caption=None, clamp=False, channels="RGB")
+        st.markdown('<style>.stImage img {height: 80px !important; width: auto !important; object-fit: cover; display: block; margin: 0;}</style>', unsafe_allow_html=True)
+    except:
+        st.warning("Image not found at the specified path. Using placeholder.")
+        st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
+    # Right: Navigation buttons
+    st.markdown('''
+    <div style="flex: 1; display: flex; justify-content: center;">
+        <div style="display: flex; gap: 1.5rem;">
+            <form action="#" method="post"><button type="submit" name="nav" value="home" style="background-color:#000;color:#fff;padding:0.5rem 1rem;border:none;border-radius:5px;font-weight:bold;">Home</button></form>
+            <form action="#" method="post"><button type="submit" name="nav" value="how_it_works" style="background-color:#000;color:#fff;padding:0.5rem 1rem;border:none;border-radius:5px;font-weight:bold;">How it Works</button></form>
+            <form action="#" method="post"><button type="submit" name="nav" value="launch" style="background-color:#000;color:#fff;padding:0.5rem 1rem;border:none;border-radius:5px;font-weight:bold;">Launch</button></form>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- PAGE CONTENT ---
+    st.markdown('<div class="content-section">', unsafe_allow_html=True)
     if st.session_state.current_page == "home":
         st.markdown("""
             <div class="card">
@@ -245,7 +228,6 @@ def main():
                 </p>
             </div>
             """, unsafe_allow_html=True)
-
     elif st.session_state.current_page == "how_it_works":
         st.markdown('<h2 class="sub-header">How It Works</h2>', unsafe_allow_html=True)
         st.markdown("""
@@ -255,43 +237,22 @@ def main():
                     reporting accessible and accurate for organizations of all sizes.
                 </p>
             </div>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-title">Upload Data</div>
+                <p class="info-text">Upload your procurement and supplier data files to begin the analysis.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-title">Manual Code Entry</div>
+                <p class="info-text">When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the required format. This guarantees complete supplier coverage for accurate emissions calculation.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-title">Emissions Calculation & Reporting</div>
+                <p class="info-text">The system automatically computes your Scope 3 emissions using verified methodologies and generates a comprehensive report ready for disclosure or analysis.</p>
+            </div>
             """, unsafe_allow_html=True)
-        # Steps
-        st.markdown('<div class="white-content">', unsafe_allow_html=True)
-
-        # Image on the left of the white box
-        st.markdown('<div style="display: flex; align-items: center;">', unsafe_allow_html=True)
-        try:
-            st.image("eiffage pic for site .png", use_container_width=False)
-        except:
-            st.warning("Image not found at the specified path. Using placeholder.")
-            st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Steps section (fixed)
-        st.markdown("""
-        <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-title">Manual Code Entry</div>
-            <p class="info-text">
-                When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the 
-                required format. This guarantees complete supplier coverage for accurate emissions calculation.
-            </p>
-        </div>
-        <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-title">Emissions Calculation & Reporting</div>
-            <p class="info-text">
-                The system automatically computes your Scope 3 emissions using verified methodologies and 
-                generates a comprehensive report ready for disclosure or analysis.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        # Bottom launch button
-        if st.button("Launch Tool Now", key="how_to_launch_btn"):
-            go_to_launch()
-
     elif st.session_state.current_page == "launch":
         st.markdown('<h2 class="sub-header">Launch Emissions Analysis</h2>', unsafe_allow_html=True)
         st.markdown("""
@@ -303,7 +264,6 @@ def main():
                 </p>
             </div>
             """, unsafe_allow_html=True)
-        # File upload section
         st.markdown('<div class="upload-box">', unsafe_allow_html=True)
         st.markdown('<h3 class="section-header">Upload Required Files</h3>', unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
@@ -314,7 +274,6 @@ def main():
         with col3:
             naf_file = st.file_uploader("NAF Codes File", type=["xlsx"], key="naf_upload")
         st.markdown('</div>', unsafe_allow_html=True)
-        # Process button
         if st.button("Process Data", key="process_btn"):
             if hl_file and siren_file and naf_file:
                 with st.spinner("Processing data..."):
@@ -359,7 +318,6 @@ def main():
                                         merged_df.loc[idx, 'Code SIREN'] = code_siren
                                         merged_df.loc[idx, 'Code APE'] = code_ape
                                         st.success("Codes saved!")
-                            # Continue processing if user has provided all missing codes
                             if st.button("Continue Processing", key="continue_btn"):
                                 process_data(merged_df, naf_df)
                         else:
@@ -368,8 +326,6 @@ def main():
                         st.error(f"An error occurred during processing: {str(e)}")
             else:
                 st.error("Please upload all three required files to proceed.")
-
-    # Footer
     st.markdown("""
     <div class="footer">
         <p>Eiffage Scope 3 Emissions Analysis Tool | Developed for Sustainability Reporting</p>
