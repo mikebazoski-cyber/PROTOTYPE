@@ -46,8 +46,8 @@ st.markdown("""
     /* White content area */
     .white-content {
         background-color: var(--light-white);
-        min-height: 100vh;
-        padding-top: 80px; /* Space for fixed black bar */
+    min-height: 80px; /* half of previous white height */
+    padding-top: 80px; /* Space for fixed black bar */
     }
     
     /* Hero section with image and buttons */
@@ -55,9 +55,16 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
+    padding: 0.34rem 2rem; /* half of previous black height */
+    min-height: 40px; /* half of new white height */
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .card {
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .hero-image {
@@ -66,10 +73,11 @@ st.markdown("""
     }
     
     .hero-image img {
-        width: 100%;
-        height: auto;
-        border-radius: 10px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    width: auto;
+    height: 80px; /* match .white-content min-height */
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    object-fit: cover;
     }
     
     .hero-buttons {
@@ -171,52 +179,14 @@ st.markdown('<div class="black-top-bar"></div>', unsafe_allow_html=True)
 # White content area
 st.markdown('<div class="white-content">', unsafe_allow_html=True)
 
-# Hero section with image and buttons
-st.markdown('<div class="hero-container">', unsafe_allow_html=True)
-
-# Left side - Image
-st.markdown('<div class="hero-image">', unsafe_allow_html=True)
+# Image left-aligned inside the white box
+st.markdown('<div style="display: flex; align-items: center;">', unsafe_allow_html=True)
 try:
-    st.image("/Users/mikemike/Downloads/eiffage pic for site.png", use_column_width=True)
+    st.image("eiffage pic for site .png", use_container_width=False)
 except:
     st.warning("Image not found at the specified path. Using placeholder.")
-    st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_column_width=True)
+    st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
 st.markdown('</div>', unsafe_allow_html=True)
-
-# Right side - Navigation buttons
-st.markdown('<div class="hero-buttons">', unsafe_allow_html=True)
-
-# Button container with consistent width
-col1, col2, col3 = st.columns([1,1,1])
-
-def go_to_home():
-    st.session_state.current_page = "home"
-
-def go_to_how_it_works():
-    st.session_state.current_page = "how_it_works"
-
-with col1:
-    st.markdown('<div class="button-container">', unsafe_allow_html=True)
-    if st.button("Home", key="home_btn_custom"):
-        go_to_home()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<div class="button-container">', unsafe_allow_html=True)
-    if st.button("How it Works", key="how_it_works_btn_custom"):
-        go_to_how_it_works()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col3:
-    st.markdown('<div class="button-container">', unsafe_allow_html=True)
-    def go_to_launch():
-        st.session_state.current_page = "launch"
-    if st.button("Launch", key="launch_btn_custom"):
-        go_to_launch()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)  # Close hero-buttons
-st.markdown('</div>', unsafe_allow_html=True)  # Close hero-container
 
 # Content sections
 st.markdown('<div class="content-section">', unsafe_allow_html=True)
@@ -242,17 +212,17 @@ def main():
     col1, col2, col3 = st.columns([1,1,1])
     with col1:
         st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        if st.button("Home", key="home_btn_custom"):
+        if st.button("Home", key="home_btn_custom_top"):
             go_to_home()
         st.markdown('</div>', unsafe_allow_html=True)
     with col2:
         st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        if st.button("How it Works", key="how_it_works_btn_custom"):
+        if st.button("How it Works", key="how_it_works_btn_custom_top"):
             go_to_how_it_works()
         st.markdown('</div>', unsafe_allow_html=True)
     with col3:
         st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        if st.button("Launch", key="launch_btn_custom"):
+        if st.button("Launch", key="launch_btn_custom_top"):
             go_to_launch()
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -285,37 +255,36 @@ def main():
             </div>
             """, unsafe_allow_html=True)
         # Steps
-        st.markdown('<div class="step-container">', unsafe_allow_html=True)
+        st.markdown('<div class="white-content">', unsafe_allow_html=True)
+
+        # Image on the left of the white box
+        st.markdown('<div style="display: flex; align-items: center;">', unsafe_allow_html=True)
+        try:
+            st.image("eiffage pic for site .png", use_container_width=False)
+        except:
+            st.warning("Image not found at the specified path. Using placeholder.")
+            st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Steps section (fixed)
         st.markdown("""
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-title">Data Preparation</div>
-                <p class="info-text">
-                    The system starts by loading and validating your procurement data, official supplier registries, 
-                    and industry emission factors. This ensures all inputs are standardized before analysis begins.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown("""
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-title">Manual Code Entry</div>
-                <p class="info-text">
-                    When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the 
-                    required format. This guarantees complete supplier coverage for accurate emissions calculation.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown("""
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-title">Emissions Calculation & Reporting</div>
-                <p class="info-text">
-                    The system automatically computes your Scope 3 emissions using verified methodologies and 
-                    generates a comprehensive report ready for disclosure or analysis.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-title">Manual Code Entry</div>
+            <p class="info-text">
+                When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the 
+                required format. This guarantees complete supplier coverage for accurate emissions calculation.
+            </p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-title">Emissions Calculation & Reporting</div>
+            <p class="info-text">
+                The system automatically computes your Scope 3 emissions using verified methodologies and 
+                generates a comprehensive report ready for disclosure or analysis.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
         # Bottom launch button
         if st.button("Launch Tool Now", key="how_to_launch_btn"):
