@@ -9,6 +9,8 @@ import re
 import streamlit as st
 from io import BytesIO
 import time
+import openpyxl
+import base64
 
 # Set page configuration
 st.set_page_config(
@@ -24,39 +26,38 @@ st.markdown("""
     :root {
         --primary-red: #FF0000;
         --light-white: #FFFFFF;
-        --dark-black: #000000;
+        --dark-black: #010B13;
     }
-    
-    /* Main container styling */
-    .main {
-        background-color: var(--light-white);
+
+    html, body { overflow-x: hidden !important; }  /* prevent horizontal scroll from 100vw */
+
     }
-    
-    /* Black top bar */
-    .black-top-bar {
-        background-color: var(--dark-black);
+
+    /* Red top bar */
+    .red-top-bar {
+        background-color: var(--primary-red);
         height: 60px;
         width: 100%;
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 999;
+        z-index: 1000;
     }
-    
-    /* White content area */
+
+    /* White content area (actually red) */
     .white-content {
         background-color: #FF0000;
-        min-height: 40px; /* half of previous white height */
-        padding-top: 80px; /* Space for fixed black bar */
+        min-height: 40px;
+        padding-top: 40px;
     }
-    
+
     /* Hero section with image and buttons */
     .hero-container {
         display: flex;
         align-items: center;
         justify-content: space-between;
-    padding: 0.34rem 2rem; /* half of previous black height */
-    min-height: 40px; /* half of new white height */
+        padding: 0.34rem 2rem;
+        min-height: 40px;
         max-width: 700px;
         margin-left: auto;
         margin-right: auto;
@@ -66,70 +67,51 @@ st.markdown("""
         margin-left: auto;
         margin-right: auto;
     }
-    
+
     .hero-image {
         flex: 1;
         padding-right: 3rem;
     }
-    
-    .hero-image img {
-    width: auto;
-    height: 80px; /* match .white-content min-height */
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    object-fit: cover;
+
+    /* Target only the hero image rendered by st.image */
+    .hero-image .stImage img {
+        width: auto !important;
+        height: 50px !important;  /* was 80px */
+        border-radius: 10px;
+        box-shadow: 0 8px 16px rgba(1,11,19,0.1);
+        object-fit: cover;
+        display: block;
+        margin: 0;                /* keep left-aligned */
     }
-    
-    .hero-buttons {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    
-    /* Custom button styling */
-    .custom-button {
-        background-color: var(--primary-red) !important;
-        color: var(--light-white) !important;
+            
+
+    /* Force all nav buttons in the hero section to black with white text */
+    .white-content .stButton > button, .white-content button[data-testid="baseButton"] {
+        background-color: #010B13 !important;
+        color: #fff !important;
         border: none !important;
-        padding: 1.2rem 2rem !important;
-        border-radius: 8px !important;
+        border-radius: 5px !important;
         font-weight: bold !important;
-        font-size: 1.2rem !important;
+        font-size: 1.35rem !important;
+        padding: 0.5rem 1.2rem !important;
+        box-shadow: 0 2px 6px rgba(1,11,19,0.08) !important;
         text-align: center !important;
-        width: 100% !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 8px rgba(255,0,0,0.2) !important;
+        outline: none !important;
+        cursor: pointer !important;
     }
-    
-    .custom-button:hover {
-        background-color: #CC0000 !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 12px rgba(255,0,0,0.3) !important;
-    }
-    
-    .custom-button:active {
-        transform: translateY(0) !important;
-    }
-    
-    /* Button container for consistent width */
-    .button-container {
-        width: 250px;
-        margin: 0.5rem 0;
-    }
-    
+
     /* Remove default Streamlit button styles */
     .stButton > button {
         all: unset !important;
     }
-    
+
     /* Content area styling */
     .content-section {
         max-width: 1200px;
         margin: 2rem auto;
         padding: 0 2rem;
     }
-    
+
     /* Section headers */
     .section-header {
         font-size: 2.2rem;
@@ -140,87 +122,94 @@ st.markdown("""
         border-bottom: 3px solid var(--primary-red);
         padding-bottom: 0.5rem;
     }
-    
+
     /* Footer styling */
     .footer {
         background-color: var(--dark-black);
         color: var(--light-white);
         text-align: center;
-        padding: 2rem;
+        padding: 0.25rem;
         margin-top: 3rem;
+        height: 5rem;
+        font-size: 1rem;
     }
-    
+
     /* Responsive design */
     @media (max-width: 768px) {
         .hero-container {
             flex-direction: column;
             text-align: center;
         }
-        
+
         .hero-image {
             padding-right: 0;
             padding-bottom: 2rem;
-        }
-        
-        .hero-buttons {
-            width: 100%;
-        }
-        
-        .button-container {
-            width: 100%;
         }
     }
 </style>
 """, unsafe_allow_html=True)
 
-
-
-
-# --- MAIN APP ENTRYPOINT (NEW LAYOUT ONLY) ---
 def main():
-    # Navigation state
-    if "current_page" not in st.session_state:
-        st.session_state.current_page = "home"
+    # Add black top bar
+    st.markdown('<div class="black-top-bar"></div>', unsafe_allow_html=True)
+    # Add red top bar
+    st.markdown('<div class="red-top-bar"></div>', unsafe_allow_html=True)
 
-    # Handle navigation via HTML forms
-    nav = st.query_params.get("nav", [None])[0]
-    if nav:
-        st.session_state.current_page = nav
-
-    # --- HERO SECTION (red box, image left, nav buttons right) ---
+    # --- HERO SECTION (red box, image and buttons in one row) ---
     st.markdown('<div class="white-content">', unsafe_allow_html=True)
-    st.markdown('<div class="white-content-row" style="display: flex; align-items: center; justify-content: space-between;">', unsafe_allow_html=True)
-    # Left: Image
-    try:
-        st.image("eiffage pic for site .png", use_container_width=False, output_format="PNG", caption=None, clamp=False, channels="RGB")
-        st.markdown('<style>.stImage img {height: 80px !important; width: auto !important; object-fit: cover; display: block; margin: 0;}</style>', unsafe_allow_html=True)
-    except:
-        st.warning("Image not found at the specified path. Using placeholder.")
-        st.image("https://via.placeholder.com/400x300/FF0000/FFFFFF?text=Eiffage+Logo", use_container_width=False)
-    # Right: Navigation buttons
-    st.markdown('''
-    <div style="flex: 1; display: flex; justify-content: center;">
-        <div style="display: flex; gap: 1.5rem;">
-            <form action="#" method="post"><button type="submit" name="nav" value="home" style="background-color:#000;color:#fff;padding:0.5rem 1rem;border:none;border-radius:5px;font-weight:bold;">Home</button></form>
-            <form action="#" method="post"><button type="submit" name="nav" value="how_it_works" style="background-color:#000;color:#fff;padding:0.5rem 1rem;border:none;border-radius:5px;font-weight:bold;">How it Works</button></form>
-            <form action="#" method="post"><button type="submit" name="nav" value="launch" style="background-color:#000;color:#fff;padding:0.5rem 1rem;border:none;border-radius:5px;font-weight:bold;">Launch</button></form>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Add padding above the buttons with a spacer
+    st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
+    
+    # Create a container for the row with logo and buttons
+    row1 = st.container()
+    
+    # Use columns with carefully chosen ratios to place buttons right of logo
+    with row1:
+        logo_col, btn1_col, btn2_col, btn3_col = st.columns([1.5, 1, 1.2, 1])
+        
+        # Logo in first column
+        with logo_col:
+            try:
+                with open("eiffage pic for site .png", "rb") as f:
+                    logo_b64 = base64.b64encode(f.read()).decode()
+                st.markdown(f'<img src="data:image/png;base64,{logo_b64}" style="height: 50px; width: auto; border-radius: 10px;" alt="Eiffage Logo">', unsafe_allow_html=True)
+            except Exception as e:
+                st.warning(f"Could not load logo: {e}")
+                st.markdown('<img src="https://via.placeholder.com/200x50/010B13/FFFFFF?text=Eiffage+Logo" style="height: 50px; width: auto;" alt="Eiffage Logo">', unsafe_allow_html=True)
+        
+        # Navigation buttons in next columns with top padding via CSS
+        with btn1_col:
+            st.markdown('<div style="padding-top: 4px;">', unsafe_allow_html=True)
+            if st.button("Home", key="nav_home", help="Go to Home", use_container_width=True):
+                st.session_state.current_page = "home"
+            st.markdown('</div>', unsafe_allow_html=True)
+                
+        with btn2_col:
+            st.markdown('<div style="padding-top: 4px;">', unsafe_allow_html=True)
+            if st.button("How it Works", key="nav_how", help="How it Works", use_container_width=True):
+                st.session_state.current_page = "how_it_works"
+            st.markdown('</div>', unsafe_allow_html=True)
+                
+        with btn3_col:
+            st.markdown('<div style="padding-top: 4px;">', unsafe_allow_html=True)
+            if st.button("Launch", key="nav_launch", help="Launch Tool", use_container_width=True):
+                st.session_state.current_page = "launch"
+            st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Close the white-content container
     st.markdown('</div>', unsafe_allow_html=True)
 
     # --- PAGE CONTENT ---
     st.markdown('<div class="content-section">', unsafe_allow_html=True)
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "home"
     if st.session_state.current_page == "home":
         st.markdown("""
-            <div class="card">
-                <h3>About This Tool</h3>
+            <div class="card" style="text-align: center;">
+                <h3 style='font-size: 3em;'>Eiffage, a leading player in a low-carbon Europe</h3>
                 <p class="info-text">
-                    Our advanced Scope 3 emissions analysis tool helps organizations accurately measure and report 
-                    their indirect greenhouse gas emissions across the entire value chain. By analyzing procurement data, 
-                    supplier information, and industry-specific emission factors, we provide comprehensive insights 
-                    into your carbon footprint.
+                    Your comprehensive solution for Scope 3 emissions calculation and reporting
                 </p>
                 <p class="info-text">
                     Understanding and managing Scope 3 emissions is crucial for developing effective sustainability strategies, 
@@ -229,42 +218,44 @@ def main():
             </div>
             """, unsafe_allow_html=True)
     elif st.session_state.current_page == "how_it_works":
-        st.markdown('<h2 class="sub-header">How It Works</h2>', unsafe_allow_html=True)
+        # Removed background image. Plain centered content.
+        st.markdown('<h2 class="sub-header" style="text-align: center;">How It Works</h2>', unsafe_allow_html=True)
         st.markdown("""
-            <div class="card">
+            <div class="card" style="text-align: center;">
                 <p class="info-text">
                     Our three-step process simplifies Scope 3 emissions calculation, making complex sustainability 
                     reporting accessible and accurate for organizations of all sizes.
                 </p>
             </div>
-            <div class="step">
+            <div class="step" style="text-align: center;">
                 <div class="step-number">1</div>
                 <div class="step-title">Upload Data</div>
                 <p class="info-text">Upload your procurement and supplier data files to begin the analysis.</p>
             </div>
-            <div class="step">
+            <div class="step" style="text-align: center;">
                 <div class="step-number">2</div>
                 <div class="step-title">Manual Code Entry</div>
                 <p class="info-text">When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the required format. This guarantees complete supplier coverage for accurate emissions calculation.</p>
             </div>
-            <div class="step">
+            <div class="step" style="text-align: center;">
                 <div class="step-number">3</div>
                 <div class="step-title">Emissions Calculation & Reporting</div>
                 <p class="info-text">The system automatically computes your Scope 3 emissions using verified methodologies and generates a comprehensive report ready for disclosure or analysis.</p>
             </div>
             """, unsafe_allow_html=True)
     elif st.session_state.current_page == "launch":
-        st.markdown('<h2 class="sub-header">Launch Emissions Analysis</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sub-header" style="text-align: center;">Launch Emissions Analysis</h2>', unsafe_allow_html=True)
         st.markdown("""
-            <div class="card">
+            <div class="card" style="text-align: center;">
                 <p class="info-text">
-                    Upload the required files to begin your Scope 3 emissions analysis. The system will process your data, 
-                    identify any missing information, and guide you through the completion process before generating 
-                    your comprehensive emissions report.
+                    Upload the required files to begin your Scope 3 emissions analysis. 
+                </p>  
+                <p class="info-text">
+                    The system will process your data and generate your comprehensive emissions report.
                 </p>
             </div>
             """, unsafe_allow_html=True)
-        st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+        st.markdown('<div class="upload-box" style="text-align: center;">', unsafe_allow_html=True)
         st.markdown('<h3 class="section-header">Upload Required Files</h3>', unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -273,7 +264,6 @@ def main():
             siren_file = st.file_uploader("SIREN_APE.xlsx", type=["xlsx"], key="siren_upload")
         with col3:
             naf_file = st.file_uploader("NAF Codes File", type=["xlsx"], key="naf_upload")
-        st.markdown('</div>', unsafe_allow_html=True)
         if st.button("Process Data", key="process_btn"):
             if hl_file and siren_file and naf_file:
                 with st.spinner("Processing data..."):
