@@ -9,7 +9,6 @@ import re
 import streamlit as st
 from io import BytesIO
 import time
-import openpyxl
 import base64
 
 # Set page configuration
@@ -30,7 +29,15 @@ st.markdown("""
     }
 
     html, body { overflow-x: hidden !important; }  /* prevent horizontal scroll from 100vw */
-
+    /* Black top bar (used above) */
+    .black-top-bar {
+        background-color: #010B13;
+        height: 8px;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1001;
     }
 
     /* Red top bar */
