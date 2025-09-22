@@ -242,7 +242,9 @@ def main():
             <div class="step" style="text-align: center;">
                 <div class="step-number">2</div>
                 <div class="step-title">Manual Code Entry</div>
-                <p class="info-text">When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the required format. This guarantees complete supplier coverage for accurate emissions calculation.</p>
+                <p class="info-text">When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the required format. 
+                    
+                    This guarantees complete supplier coverage for accurate emissions calculation.</p>
             </div>
             <div class="step" style="text-align: center;">
                 <div class="step-number">3</div>
