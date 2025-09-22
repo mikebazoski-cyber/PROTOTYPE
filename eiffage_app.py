@@ -118,6 +118,38 @@ st.markdown("""
         margin: 2rem auto;
         padding: 0 2rem;
     }
+    /* Slightly larger body text */
+    .info-text-lg {
+        font-size: 1.2rem;
+    }
+
+    /* How It Works: step styles */
+    .step {
+        text-align: center;
+        margin: 1rem auto 1.5rem auto;
+    }
+    .step-title {
+        font-size: 1.6rem; /* two sizes bigger */
+        font-weight: 800;
+        color: var(--dark-black);
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background-color: var(--primary-red);
+        color: #FFFFFF;
+        font-weight: 800;
+        border-radius: 10px; /* red box with slight rounding */
+        border: 2px solid #cc0000; /* subtle darker red border */
+        box-shadow: 0 2px 6px rgba(1,11,19,0.08);
+        font-size: 1.2rem;
+        margin: 0 auto 0.5rem auto;
+    }
 
     /* Section headers */
     .section-header {
@@ -215,15 +247,30 @@ def main():
         st.markdown("""
             <div class="card" style="text-align: center;">
                 <h3 style='font-size: 3em;'>Eiffage, a leading player in a low-carbon Europe</h3>
-                <p class="info-text">
+                <p class="info-text info-text-lg">
                     Your comprehensive solution for Scope 3 emissions calculation and reporting
                 </p>
-                <p class="info-text">
+                <p class="info-text info-text-lg">
                     Understanding and managing Scope 3 emissions is crucial for developing effective sustainability strategies, 
                     meeting regulatory requirements, and demonstrating environmental responsibility to stakeholders.
                 </p>
             </div>
             """, unsafe_allow_html=True)
+        # Insert requested image directly after the above paragraph
+        try:
+            with open("SUSTAINABLE PIC.jpg", "rb") as f:
+                sustain_b64 = base64.b64encode(f.read()).decode()
+            st.markdown(
+                f"""
+                <div class="card" style="text-align: center;">
+                    <img src="data:image/jpeg;base64,{sustain_b64}" alt="Sustainable" 
+                         style="max-width:100%; height:auto; border-radius:10px; box-shadow:0 8px 16px rgba(1,11,19,0.1);"/>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        except Exception as e:
+            st.warning(f"Could not load 'SUSTAINABLE PIC.jpg': {e}")
     elif st.session_state.current_page == "how_it_works":
         # Removed background image. Plain centered content.
         st.markdown('<h2 class="sub-header" style="text-align: center;">How It Works</h2>', unsafe_allow_html=True)
@@ -232,7 +279,7 @@ def main():
                 <p class="info-text">
                     Our three-step process simplifies Scope 3 emissions calculation, making complex sustainability 
                     reporting accessible and accurate for organizations of all sizes.
-                </p>
+            </p>
             </div>
             <div class="step" style="text-align: center;">
                 <div class="step-number">1</div>
@@ -241,15 +288,13 @@ def main():
             </div>
             <div class="step" style="text-align: center;">
                 <div class="step-number">2</div>
-                <div class="step-title">Manual Code Entry</div>
-                <p class="info-text">When automatic matching fails, the system guides you to enter missing SIREN or NAF codes in the required format. 
-                    
-                    This guarantees complete supplier coverage for accurate emissions calculation.</p>
+                <div class="step-title">Emissions Calculation</div>
+                <p class="info-text">The system automatically computes your Scope 3 emissions using verified methodologies for accurate emissions calculation. </p>
             </div>
             <div class="step" style="text-align: center;">
                 <div class="step-number">3</div>
-                <div class="step-title">Emissions Calculation & Reporting</div>
-                <p class="info-text">The system automatically computes your Scope 3 emissions using verified methodologies and generates a comprehensive report ready for disclosure or analysis.</p>
+                <div class="step-title">Reporting</div>
+                <p class="info-text">The system generates a comprehensive report, ready for disclosure or analysis, and delivers it in a downloadable Excel format. </p>
             </div>
             """, unsafe_allow_html=True)
     elif st.session_state.current_page == "launch":
