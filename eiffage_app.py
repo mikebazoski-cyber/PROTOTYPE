@@ -463,17 +463,17 @@ def process_data(merged_df, naf_df):
         
         # Display data table
         st.dataframe(final_structured_table, use_container_width=True)
-        
+
         # Download button
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = f'HL_MATERIAUX_CODE_APE_SIREN_{timestamp}.xlsx'
-        
+        # Use a fixed, user-friendly filename for the exported Excel
+        output_filename = "scope 3 emission calculation results.xlsx"
+
         # Convert to Excel for download
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             final_structured_table.to_excel(writer, index=False, sheet_name='Results')
         output.seek(0)
-        
+
         st.download_button(
             label="📥 Download Results as Excel",
             data=output,
